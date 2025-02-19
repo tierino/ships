@@ -17,9 +17,10 @@ type Producer interface {
 	Send(msg interface{}) error
 }
 
-var toTopic = map[string]string{
-	string(types.PositionReportType):   "position-reports",
-	string(types.StaticDataReportType): "static-data-reports",
+var toTopic = map[types.AISMessageType]string{
+	types.PositionReportLabel:   "position-reports",
+	types.StaticDataReportLabel: "static-data-reports",
+	types.ShipStaticDataLabel:   "ship-static-data",
 }
 
 func main() {
@@ -35,6 +36,7 @@ func main() {
 	producer := producer.New()
 	tcpclient := tcpclient.New()
 	reader := tcpclient.ReadMessages(address)
+	decoder := decoder.New()
 	defer tcpclient.Disconnect()
 
 	for {
@@ -47,7 +49,7 @@ func main() {
 		if err != nil {
 			fmt.Printf("could not decode raw payload: %s\n", err.Error())
 		} else if decoded != nil {
-			producer.Send(toTopic[string(decoded.Type)], *decoded)
+			producer.Send(toTopic[decoded.Label], decoded.Packet)
 		}
 	}
 }

@@ -1,9 +1,6 @@
 package mapper
 
-import (
-	"example.com/types"
-)
-
-func Transform(msg *types.AISMessage) (string, error) {
+func Transform(msg string) (string, error) {
+	// todo
 	return "Transformed message", nil
 }

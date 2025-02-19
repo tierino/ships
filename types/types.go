@@ -1,25 +1,14 @@
 package types
 
-import "github.com/BertoldVdb/go-ais"
-
 type AISMessageType string
 
 const (
-	PositionReportType           AISMessageType = "PositionReport"
-	StaticDataReportType         AISMessageType = "StaticDataReport"
-	ShipStaticDataType           AISMessageType = "ShipStaticData"
-	AidsToNavigationReport       AISMessageType = "AidsToNavigationReport"
-	StandardClassBPositionReport AISMessageType = "StandardClassBPositionReport"
+	PositionReportLabel               AISMessageType = "PositionReport"
+	StaticDataReportLabel             AISMessageType = "StaticDataReport"
+	ShipStaticDataLabel               AISMessageType = "ShipStaticData"
+	AidsToNavigationReportLabel       AISMessageType = "AidsToNavigationReport"
+	StandardClassBPositionReportLabel AISMessageType = "StandardClassBPositionReport"
 )
-
-type AISMessage struct {
-	Type                         AISMessageType
-	PositionReport               *ais.PositionReport
-	StaticDataReport             *ais.StaticDataReport
-	ShipStaticData               *ais.ShipStaticData
-	AidsToNavigationReport       *ais.AidsToNavigationReport
-	StandardClassBPositionReport *ais.StandardClassBPositionReport
-}
 
 type PositionReportEvent struct {
 	MMSI         uint32
@@ -38,4 +27,5 @@ type PositionReportEvent struct {
 
 type StaticDataReportEvent struct {
 	MMSI uint32
+	// todo
 }
