@@ -11,21 +11,36 @@ const (
 )
 
 type PositionReportEvent struct {
-	MMSI         uint32
-	ShipType     uint8
-	ShipTypeText string
-	Status       uint8
-	StatusText   string
-	Speed        float64
-	Latitude     float64
-	Longitude    float64
-	Course       float64
-	Heading      uint16
-	Turn         uint16
-	Accuracy     bool
+	MMSI       uint32  `json:"mmsi"`
+	Status     uint8   `json:"status"`
+	StatusText string  `json:"status_text"`
+	Speed      float64 `json:"speed"`
+	Latitude   float64 `json:"lat"`
+	Longitude  float64 `json:"lon"`
+	Course     float64 `json:"course"`
+	Heading    uint16  `json:"heading"`
+	Turn       uint16  `json:"turn"`
+	Accuracy   bool    `json:"accuracy"`
 }
 
-type StaticDataReportEvent struct {
-	MMSI uint32
-	// todo
+func (p *PositionReportEvent) GetType() AISMessageType {
+	return PositionReportLabel
+}
+
+type ShipStaticDataEvent struct {
+	MMSI         uint32 `json:"mmsi"`
+	ShipName     string `json:"ship_name"`
+	ShipType     uint8  `json:"ship_type"`
+	ShipTypeText string `json:"ship_type_text"`
+	CallSign     string `json:"call_sign"`
+	ToBow        uint16 `json:"to_bow"`
+	ToStern      uint16 `json:"to_stern"`
+	ToPort       uint16 `json:"to_port"`
+	ToStarboard  uint16 `json:"to_starboard"`
+	ETA          string `json:"eta"`
+	Destination  string `json:"dest"`
+}
+
+func (p *ShipStaticDataEvent) GetType() AISMessageType {
+	return ShipStaticDataLabel
 }

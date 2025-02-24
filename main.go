@@ -1,27 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
 
 	"example.com/decoder"
+	"example.com/mapper"
 	"example.com/producer"
 	"example.com/tcpclient"
-	"example.com/types"
+	"github.com/BertoldVdb/go-ais"
 )
 
 var address = "153.44.253.27:5631"
-
-type Producer interface {
-	Send(msg interface{}) error
-}
-
-var toTopic = map[types.AISMessageType]string{
-	types.PositionReportLabel:   "position-reports",
-	types.StaticDataReportLabel: "static-data-reports",
-	types.ShipStaticDataLabel:   "ship-static-data",
-}
 
 func main() {
 	abort := make(chan os.Signal, 1)
@@ -33,7 +25,13 @@ func main() {
 		os.Exit(0)
 	}()
 
-	producer := producer.New()
+	producer, err := producer.New(&producer.Config{BootstrapServers: "localhost:9092"})
+	// todo properly handle producer errors
+	if err != nil {
+		panic(err)
+	}
+	defer producer.Disconnect()
+
 	tcpclient := tcpclient.New()
 	reader := tcpclient.ReadMessages(address)
 	decoder := decoder.New()
@@ -49,7 +47,22 @@ func main() {
 		if err != nil {
 			fmt.Printf("could not decode raw payload: %s\n", err.Error())
 		} else if decoded != nil {
-			producer.Send(toTopic[decoded.Label], decoded.Packet)
+			switch r := (*decoded).(type) {
+			case ais.PositionReport:
+				out, err := json.Marshal(mapper.TransformPositionReport(&r))
+				if err != nil {
+					fmt.Errorf("could not marshal PositionReport: %w", err)
+				}
+				producer.Send("position-reports", out)
+			case ais.ShipStaticData:
+				out, err := json.Marshal(mapper.TransformShipStaticData(&r))
+				if err != nil {
+					fmt.Errorf("could not marshal ShipStaticData: %w", err)
+				}
+				producer.Send("ship-static-data", out)
+			default:
+				fmt.Errorf("cannot handle %T messages", r)
+			}
 		}
 	}
 }

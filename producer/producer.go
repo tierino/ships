@@ -1,19 +1,38 @@
 package producer
 
 import (
-	"encoding/json"
 	"fmt"
+
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-type Producer struct{}
-
-func New() *Producer {
-	// init
-	return &Producer{}
+type Config struct {
+	BootstrapServers string
 }
 
-func (s *Producer) Send(topic string, msg interface{}) error {
-	out, _ := json.Marshal(msg)
-	fmt.Printf("%s: %s\n", topic, out)
-	return nil
+type Producer struct {
+	kp *kafka.Producer
+}
+
+func New(conf *Config) (*Producer, error) {
+	kp, err := kafka.NewProducer(&kafka.ConfigMap{
+		"bootstrap.servers": conf.BootstrapServers,
+	})
+	if err != nil {
+		fmt.Println("coconut")
+		return nil, fmt.Errorf("failed to create Kafka producer: %w", err)
+	}
+	return &Producer{kp}, nil
+}
+
+func (p *Producer) Send(topic string, msg []byte) error {
+	err := p.kp.Produce(&kafka.Message{
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          msg,
+	}, nil)
+	return err
+}
+
+func (p *Producer) Disconnect() {
+	p.kp.Close()
 }
