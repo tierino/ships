@@ -19,7 +19,6 @@ func New(conf *Config) (*Producer, error) {
 		"bootstrap.servers": conf.BootstrapServers,
 	})
 	if err != nil {
-		fmt.Println("coconut")
 		return nil, fmt.Errorf("failed to create Kafka producer: %w", err)
 	}
 	return &Producer{kp}, nil
